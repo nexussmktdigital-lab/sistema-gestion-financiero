@@ -3,14 +3,12 @@ import { Routes, Route } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import Layout from './components/layout/Layout'
 import Login from './components/auth/Login'
-import SetupScreen from './components/auth/SetupScreen'
 import Dashboard from './components/dashboard/Dashboard'
 import Clientes from './components/clientes/Clientes'
 import Cheques from './components/cheques/Cheques'
 import Divisas from './components/divisas/Divisas'
 import Creditos from './components/creditos/Creditos'
 import Alertas from './components/alertas/Alertas'
-import { isConfigured } from './lib/supabase'
 import { Loader2 } from 'lucide-react'
 
 function AppContent() {
@@ -44,9 +42,6 @@ function AppContent() {
 }
 
 export default function App() {
-  // Muestra los pasos de configuración si Supabase no está conectado
-  if (!isConfigured) return <SetupScreen />
-
   return (
     <AppProvider>
       <AppContent />
