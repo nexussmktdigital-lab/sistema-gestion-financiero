@@ -9,6 +9,7 @@ import Cheques from './components/cheques/Cheques'
 import Divisas from './components/divisas/Divisas'
 import Creditos from './components/creditos/Creditos'
 import Alertas from './components/alertas/Alertas'
+import { isConfigured } from './lib/supabase'
 import { Loader2 } from 'lucide-react'
 
 function AppContent() {
@@ -42,6 +43,24 @@ function AppContent() {
 }
 
 export default function App() {
+  if (!isConfigured) {
+    return (
+      <div className="min-h-screen bg-apple-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <p className="text-2xl mb-3">⚙️</p>
+          <h1 className="text-lg font-semibold text-gray-800 mb-2">Variables de entorno faltantes</h1>
+          <p className="text-sm text-gray-500 mb-4">
+            Configurá <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_URL</code> y{' '}
+            <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_ANON_KEY</code> en Vercel y redeplogá.
+          </p>
+          <p className="text-xs text-gray-400">
+            URL correcta: <code>https://TU-ID.supabase.co</code>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <AppProvider>
       <AppContent />
