@@ -25,6 +25,18 @@ export const chequeFromDb = (r) => ({
   esDigital: r.es_digital ?? false,
   comision: Number(r.comision ?? 0),
   estado: r.estado ?? 'pendiente',
+  destino: r.destino ?? '',
+  destinoDetalle: r.destino_detalle ?? '',
+  fechaUso: r.fecha_uso ?? '',
+  notas: r.notas ?? '',
+  createdAt: r.created_at,
+})
+
+export const cajaDiariaFromDb = (r) => ({
+  id: r.id,
+  fecha: r.fecha,
+  pesosInicial: Number(r.pesos_inicial ?? 0),
+  dolaresInicial: Number(r.dolares_inicial ?? 0),
   notas: r.notas ?? '',
   createdAt: r.created_at,
 })
@@ -101,8 +113,19 @@ export const chequeToDb = (c) => ({
   es_digital: Boolean(c.esDigital),
   comision: Number(c.comision) || 0,
   estado: c.estado || 'pendiente',
+  destino: c.destino || null,
+  destino_detalle: c.destinoDetalle || null,
+  fecha_uso: c.fechaUso || null,
   notas: c.notas || null,
   created_at: c.createdAt || undefined,
+})
+
+export const cajaDiariaToDb = (c) => ({
+  id: c.id,
+  fecha: c.fecha,
+  pesos_inicial: Number(c.pesosInicial) || 0,
+  dolares_inicial: Number(c.dolaresInicial) || 0,
+  notas: c.notas || null,
 })
 
 export const divisaToDb = (d) => ({

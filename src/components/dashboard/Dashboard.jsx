@@ -1,13 +1,15 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
-import { FileCheck, ArrowLeftRight, CreditCard, Bell, Users, TrendingUp, AlertCircle } from 'lucide-react'
+import { FileCheck, ArrowLeftRight, CreditCard, Bell, Users, TrendingUp, AlertCircle, Wallet, DollarSign, Pencil, ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import Header from '../layout/Header'
 import { useApp } from '../../context/AppContext'
 import { formatCurrency, formatDate, getDaysUntil } from '../../utils/formatters'
+import { saldoFinalDelDia, today } from '../../utils/caja'
+import CajaDiariaModal from '../caja/CajaDiariaModal'
 import clsx from 'clsx'
 
 const COLORS = ['#007AFF', '#34C759', '#FF9500', '#FF3B30', '#AF52DE', '#5AC8FA']
@@ -59,7 +61,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 export default function Dashboard() {
   const { state } = useApp()
   const navigate = useNavigate()
+  const [cajaOpen, setCajaOpen] = useState(false)
   const { cheques, divisas, creditos, alertas, clientes } = state
+
+  const cajaHoy = useMemo(() => saldoFinalDelDia(state, today()), [state])
 
   const stats = useMemo(() => {
     const totalCheques = cheques.reduce((s, c) => s + Number(c.importe || 0), 0)
@@ -126,6 +131,95 @@ export default function Dashboard() {
       <Header title="Dashboard" subtitle={`${new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`} />
 
       <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+        {/* Caja del día */}
+        <div className="card p-4 md:p-5">
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="flex items-center gap-2">
+              <Wallet size={16} className="text-apple-blue" />
+              <h3 className="text-sm md:text-base font-semibold text-apple-gray-800">Caja del día</h3>
+              {cajaHoy.esArrastre && (
+                <span className="text-[10px] bg-orange-50 text-apple-orange px-1.5 py-0.5 rounded-full border border-orange-100">
+                  arrastre
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setCajaOpen(true)}
+              className="flex items-center gap-1 text-xs text-apple-blue hover:underline"
+            >
+              <Pencil size={11} /> Editar caja
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
+            {/* Pesos */}
+            <div className="p-3 md:p-4 rounded-apple bg-gradient-to-br from-blue-50 to-white border border-blue-100">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] md:text-xs font-medium text-apple-gray-500">Pesos ARS</p>
+                <Wallet size={12} className="text-apple-blue" />
+              </div>
+              <p className="text-lg md:text-2xl font-bold text-apple-gray-900 truncate">{formatCurrency(cajaHoy.pesosFinal)}</p>
+              <div className="flex items-center gap-1 mt-1 text-[10px] md:text-xs text-apple-gray-400">
+                <span>Inicial: {formatCurrency(cajaHoy.pesosInicial)}</span>
+                {cajaHoy.pesosFinal - cajaHoy.pesosInicial !== 0 && (
+                  <span className={clsx('flex items-center gap-0.5 font-medium', cajaHoy.pesosFinal - cajaHoy.pesosInicial > 0 ? 'text-apple-green' : 'text-apple-red')}>
+                    {cajaHoy.pesosFinal - cajaHoy.pesosInicial > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                    {formatCurrency(Math.abs(cajaHoy.pesosFinal - cajaHoy.pesosInicial))}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Dólares */}
+            <div className="p-3 md:p-4 rounded-apple bg-gradient-to-br from-green-50 to-white border border-green-100">
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[10px] md:text-xs font-medium text-apple-gray-500">Dólares USD</p>
+                <DollarSign size={12} className="text-apple-green" />
+              </div>
+              <p className="text-lg md:text-2xl font-bold text-apple-gray-900 truncate">
+                {cajaHoy.dolaresFinal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+              <div className="flex items-center gap-1 mt-1 text-[10px] md:text-xs text-apple-gray-400">
+                <span>Inicial: {cajaHoy.dolaresInicial.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                {cajaHoy.dolaresFinal - cajaHoy.dolaresInicial !== 0 && (
+                  <span className={clsx('flex items-center gap-0.5 font-medium', cajaHoy.dolaresFinal - cajaHoy.dolaresInicial > 0 ? 'text-apple-green' : 'text-apple-red')}>
+                    {cajaHoy.dolaresFinal - cajaHoy.dolaresInicial > 0 ? <ArrowUpRight size={10} /> : <ArrowDownRight size={10} />}
+                    {Math.abs(cajaHoy.dolaresFinal - cajaHoy.dolaresInicial).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Movimientos del día */}
+          {cajaHoy.movimientos.length > 0 && (
+            <div className="mt-3 md:mt-4 pt-3 border-t border-apple-gray-50">
+              <p className="text-[10px] md:text-xs font-semibold text-apple-gray-500 uppercase tracking-wide mb-2">
+                Movimientos de hoy ({cajaHoy.movimientos.length})
+              </p>
+              <div className="space-y-1 max-h-40 overflow-y-auto">
+                {cajaHoy.movimientos.map(m => (
+                  <div key={m.id} className="flex items-center justify-between text-xs py-1">
+                    <span className="text-apple-gray-600 truncate pr-2">{m.detalle}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {m.pesos !== 0 && (
+                        <span className={clsx('font-medium', m.pesos > 0 ? 'text-apple-green' : 'text-apple-red')}>
+                          {m.pesos > 0 ? '+' : ''}{formatCurrency(m.pesos)}
+                        </span>
+                      )}
+                      {m.dolares !== 0 && (
+                        <span className={clsx('font-medium', m.dolares > 0 ? 'text-apple-green' : 'text-apple-red')}>
+                          {m.dolares > 0 ? '+' : ''}{m.dolares.toLocaleString('es-AR', { minimumFractionDigits: 2 })} USD
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <StatCard
@@ -275,6 +369,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <CajaDiariaModal open={cajaOpen} onClose={() => setCajaOpen(false)} />
     </div>
   )
 }

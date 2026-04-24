@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react'
-import { Plus, FileCheck, Pencil, Trash2, Search, Smartphone, Building2 } from 'lucide-react'
+import { Plus, FileCheck, Pencil, Trash2, Search, Smartphone, Building2, List, GitBranch } from 'lucide-react'
 import Header from '../layout/Header'
 import Modal from '../ui/Modal'
 import ConfirmDialog from '../ui/ConfirmDialog'
 import EmptyState from '../ui/EmptyState'
 import ChequeForm from './ChequeForm'
+import ChequesMovimientos from './ChequesMovimientos'
 import Badge from '../ui/Badge'
 import { useApp } from '../../context/AppContext'
 import { formatCurrency, formatDate, formatCUIT, getDaysUntil } from '../../utils/formatters'
@@ -18,6 +19,7 @@ const estadoConfig = {
 
 export default function Cheques() {
   const { state, dispatch, notify } = useApp()
+  const [tab, setTab] = useState('lista')
   const [search, setSearch]           = useState('')
   const [filterEstado, setFilterEstado] = useState('todos')
   const [showAdd, setShowAdd]         = useState(false)
@@ -94,6 +96,32 @@ export default function Cheques() {
           ))}
         </div>
 
+        {/* Tabs */}
+        <div className="flex gap-1 border-b border-apple-gray-100">
+          <button
+            onClick={() => setTab('lista')}
+            className={clsx(
+              'flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+              tab === 'lista' ? 'border-apple-blue text-apple-blue' : 'border-transparent text-apple-gray-500 hover:text-apple-gray-700'
+            )}
+          >
+            <List size={14} /> Lista de cheques
+          </button>
+          <button
+            onClick={() => setTab('movimientos')}
+            className={clsx(
+              'flex items-center gap-1.5 px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+              tab === 'movimientos' ? 'border-apple-blue text-apple-blue' : 'border-transparent text-apple-gray-500 hover:text-apple-gray-700'
+            )}
+          >
+            <GitBranch size={14} /> Movimientos
+          </button>
+        </div>
+
+        {tab === 'movimientos' ? (
+          <ChequesMovimientos onEdit={setEditTarget} />
+        ) : (
+        <>
         {/* Filtros */}
         <div className="flex gap-2 flex-wrap">
           <div className="relative flex-1 min-w-[160px]">
@@ -225,6 +253,8 @@ export default function Cheques() {
               </div>
             </div>
           </>
+        )}
+        </>
         )}
       </div>
 

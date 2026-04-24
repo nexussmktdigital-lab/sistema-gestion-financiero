@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppProvider, useApp } from './context/AppContext'
 import Layout from './components/layout/Layout'
@@ -9,11 +9,27 @@ import Cheques from './components/cheques/Cheques'
 import Divisas from './components/divisas/Divisas'
 import Creditos from './components/creditos/Creditos'
 import Alertas from './components/alertas/Alertas'
+import CajaDiariaModal from './components/caja/CajaDiariaModal'
 import { isConfigured } from './lib/supabase'
+import { today } from './utils/caja'
 import { Loader2 } from 'lucide-react'
 
 function AppContent() {
-  const { user, loading } = useApp()
+  const { state, user, loading } = useApp()
+  const [cajaOpen, setCajaOpen] = useState(false)
+
+  // Abrir modal de caja al primer login del día
+  useEffect(() => {
+    if (loading || !user) return
+    const hoy = today()
+    const yaCargada = state.cajas.some(c => c.fecha === hoy)
+    const sessionKey = `caja-prompt-${user.id}-${hoy}`
+    const yaMostrado = sessionStorage.getItem(sessionKey)
+    if (!yaCargada && !yaMostrado) {
+      setCajaOpen(true)
+      sessionStorage.setItem(sessionKey, '1')
+    }
+  }, [loading, user, state.cajas])
 
   if (loading) {
     return (
@@ -38,6 +54,7 @@ function AppContent() {
         <Route path="/creditos" element={<Creditos />} />
         <Route path="/alertas" element={<Alertas />} />
       </Routes>
+      <CajaDiariaModal open={cajaOpen} onClose={() => setCajaOpen(false)} />
     </Layout>
   )
 }

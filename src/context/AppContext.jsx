@@ -11,6 +11,7 @@ const initialState = {
   divisas: [],
   creditos: [],
   alertas: [],
+  cajas: [],
   searchQuery: '',
   notification: null,
 }
@@ -58,6 +59,14 @@ function reducer(state, action) {
     case 'DELETE_ALERTA':
       return { ...state, alertas: state.alertas.filter(a => a.id !== action.payload) }
 
+    // ─── CAJA DIARIA ──────────────────────────────────────────────────────
+    case 'ADD_CAJA':
+      return { ...state, cajas: [...state.cajas, { ...action.payload, id: action.payload.id }] }
+    case 'UPDATE_CAJA':
+      return { ...state, cajas: state.cajas.map(c => c.id === action.payload.id ? { ...c, ...action.payload } : c) }
+    case 'DELETE_CAJA':
+      return { ...state, cajas: state.cajas.filter(c => c.id !== action.payload) }
+
     // ─── UI ───────────────────────────────────────────────────────────────
     case 'SET_SEARCH':     return { ...state, searchQuery: action.payload }
     case 'SHOW_NOTIFICATION': return { ...state, notification: action.payload }
@@ -98,6 +107,9 @@ async function syncToDb(action) {
     case 'ADD_ALERTA':     return api.insertAlerta(p)
     case 'UPDATE_ALERTA':  return api.updateAlerta(p)
     case 'DELETE_ALERTA':  return api.deleteAlerta(p)
+    case 'ADD_CAJA':       return api.insertCaja(p)
+    case 'UPDATE_CAJA':    return api.updateCaja(p)
+    case 'DELETE_CAJA':    return api.deleteCaja(p)
     default: return null
   }
 }
@@ -108,6 +120,7 @@ const DB_ACTIONS = new Set([
   'ADD_DIVISA','UPDATE_DIVISA','DELETE_DIVISA',
   'ADD_CREDITO','UPDATE_CREDITO','DELETE_CREDITO',
   'ADD_ALERTA','UPDATE_ALERTA','DELETE_ALERTA',
+  'ADD_CAJA','UPDATE_CAJA','DELETE_CAJA',
 ])
 
 export function AppProvider({ children }) {
@@ -146,7 +159,7 @@ export function AppProvider({ children }) {
       }
       if (event === 'SIGNED_OUT') {
         setUser(null)
-        dispatch({ type: 'LOAD_STATE', payload: { clientes: [], cheques: [], divisas: [], creditos: [], alertas: [] } })
+        dispatch({ type: 'LOAD_STATE', payload: { clientes: [], cheques: [], divisas: [], creditos: [], alertas: [], cajas: [] } })
       }
     })
 

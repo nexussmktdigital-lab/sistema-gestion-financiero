@@ -16,6 +16,9 @@ const empty = {
   esDigital: false,
   comision: '',
   estado: 'pendiente',
+  destino: '',
+  destinoDetalle: '',
+  fechaUso: '',
   notas: '',
 }
 
@@ -99,6 +102,31 @@ export default function ChequeForm({ initial, onClose }) {
             <option value="cobrado">Cobrado</option>
             <option value="rechazado">Rechazado</option>
           </select>
+        </div>
+
+        {/* Movimiento / Destino del cheque */}
+        <div className="col-span-2 pt-2 border-t border-apple-gray-100">
+          <p className="text-xs font-semibold text-apple-gray-500 uppercase tracking-wide mb-2">Movimiento del cheque</p>
+        </div>
+        <div>
+          <label className="label">Destino del dinero</label>
+          <select className="input" value={form.destino || ''} onChange={e => set('destino', e.target.value)}>
+            <option value="">— Sin asignar —</option>
+            <option value="caja">Caja (efectivo)</option>
+            <option value="divisa">Compra de divisa</option>
+            <option value="credito">Otorgamiento de crédito</option>
+            <option value="proveedor">Pago a proveedor</option>
+            <option value="gasto">Gasto</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div>
+          <label className="label">Fecha de uso</label>
+          <input className="input" type="date" value={form.fechaUso || ''} onChange={e => set('fechaUso', e.target.value)} />
+        </div>
+        <div className="col-span-2">
+          <label className="label">Detalle del movimiento</label>
+          <input className="input" value={form.destinoDetalle || ''} onChange={e => set('destinoDetalle', e.target.value)} placeholder="Ej: Pago a proveedor X, compra USD 500 al tipo 1000..." />
         </div>
 
         <div className="col-span-2">

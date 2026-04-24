@@ -5,6 +5,7 @@ import {
   divisaFromDb, divisaToDb,
   creditoFromDb, creditoToDb,
   alertaFromDb, alertaToDb,
+  cajaDiariaFromDb, cajaDiariaToDb,
 } from './mappers'
 
 // ─── Helper ─────────────────────────────────────────────────────────────────
@@ -17,12 +18,13 @@ async function query(promise) {
 // ─── CLIENTES ────────────────────────────────────────────────────────────────
 export const api = {
   async fetchAll() {
-    const [clientes, cheques, divisas, creditos, alertas] = await Promise.all([
+    const [clientes, cheques, divisas, creditos, alertas, cajas] = await Promise.all([
       query(supabase.from('clientes').select('*').order('nombre')),
       query(supabase.from('cheques').select('*').order('fecha_cobro')),
       query(supabase.from('divisas').select('*').order('fecha_transaccion', { ascending: false })),
       query(supabase.from('creditos').select('*').order('fecha_emision', { ascending: false })),
       query(supabase.from('alertas').select('*').order('fecha_alerta')),
+      query(supabase.from('caja_diaria').select('*').order('fecha', { ascending: false })),
     ])
     return {
       clientes: clientes.map(clienteFromDb),
@@ -30,6 +32,7 @@ export const api = {
       divisas: divisas.map(divisaFromDb),
       creditos: creditos.map(creditoFromDb),
       alertas: alertas.map(alertaFromDb),
+      cajas: cajas.map(cajaDiariaFromDb),
     }
   },
 
@@ -57,4 +60,9 @@ export const api = {
   insertAlerta: (a) => query(supabase.from('alertas').insert(alertaToDb(a))),
   updateAlerta: (a) => query(supabase.from('alertas').update(alertaToDb(a)).eq('id', a.id)),
   deleteAlerta: (id) => query(supabase.from('alertas').delete().eq('id', id)),
+
+  // Caja diaria
+  insertCaja: (c) => query(supabase.from('caja_diaria').insert(cajaDiariaToDb(c))),
+  updateCaja: (c) => query(supabase.from('caja_diaria').update(cajaDiariaToDb(c)).eq('id', c.id)),
+  deleteCaja: (id) => query(supabase.from('caja_diaria').delete().eq('id', id)),
 }
