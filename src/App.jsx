@@ -10,6 +10,7 @@ import Divisas from './components/divisas/Divisas'
 import Creditos from './components/creditos/Creditos'
 import Alertas from './components/alertas/Alertas'
 import CajaDiariaModal from './components/caja/CajaDiariaModal'
+import DemoNotice from './components/demo/DemoNotice'
 import { isConfigured } from './lib/supabase'
 import { today } from './utils/caja'
 import { Loader2 } from 'lucide-react'
@@ -46,6 +47,7 @@ function AppContent() {
 
   return (
     <Layout>
+      <DemoNotice />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/clientes" element={<Clientes />} />
